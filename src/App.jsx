@@ -4,6 +4,7 @@ import ProtectedRoute from "./assets/components/ProtectedRoute";
 import Login from './assets/views/Login'
 import Encabezado from "./assets/components/Encabezado";
 import Inicio from "./assets/views/Inicio";
+import Productos from "./assets/views/Productos";
 import Categorias from "./assets/views/Categorias"; //Importación de Categorias
 import './App.css'
 
@@ -13,18 +14,17 @@ function App() {
     <>
       <AuthProvider>
         <Router>
-          <div className="App">
             <Encabezado />
-            <main>
+            <main className="margen-superior-main">
               <Routes>
                 
                 <Route path="/" element={<Login />} />
                 <Route path="/inicio" element={<ProtectedRoute element={<Inicio />} />} />
                 <Route path="/categorias" element={<ProtectedRoute element={<Categorias />} />}/> //Ruta de Categorias protegida
+                <Route path="/productos" element= {<ProtectedRoute element={<Productos />} />}/>
 
               </Routes>
             </main>
-          </div>
         </Router>
       </AuthProvider>
     </>
