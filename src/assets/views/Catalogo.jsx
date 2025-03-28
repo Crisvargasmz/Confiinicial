@@ -1,16 +1,19 @@
 import React, { useState, useEffect } from "react";
-import { Container, Row, Form, Col } from "react-bootstrap";
+import { Container, Row, Form, Col, Button } from "react-bootstrap";
 import { db } from "../database/firebaseconfig";
-import { collection, getDocs } from "firebase/firestore";
+import {  collection,
+  getDocs,
+  updateDoc,
+  doc,} from "firebase/firestore";
 import TarjetaProducto from "../components/catalog/TarjetaProducto";
+import ModalEdicionProducto from "../components/products/ModalEdicionProducto";
 
 const Catalogo= () => {
   const [productos, setProductos] = useState([]);
   const [categorias, setCategorias] = useState([]);
   const [categoriaSeleccionada, setCategoriaSeleccionada] = useState("Todas");
-
-  const productosCollection = collection(db, "productos");
-  const categoriasCollection = collection(db, "categorias");
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [productoEditado, setProductoEditado] = useState(null);
 
   const fetchData = async () => {
     try {
@@ -34,9 +37,58 @@ const Catalogo= () => {
     }
   };
 
-  useEffect(() => {
-    fetchData();
-  }, []);
+    // Hook useEffect para carga inicial de datos
+    useEffect(() => {
+      fetchData();
+    }, []);
+
+      // Función para abrir el modal de edición con datos prellenados
+  const openEditModal = (producto) => {
+    setProductoEditado({ ...producto });
+    setShowEditModal(true);
+  };
+
+
+    // Manejador de cambios en inputs del formulario de edición
+    const handleEditInputChange = (e) => {
+      const { name, value } = e.target;
+      setProductoEditado((prev) => ({ ...prev, [name]: value }));
+    };
+
+    const handleEditImageChange = (e) => {
+      const file = e.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          setProductoEditado((prev) => ({ ...prev, imagen: reader.result }));
+        };
+        reader.readAsDataURL(file);
+      }
+    };
+
+      // Función para actualizar un producto existente (UPDATE)
+  const handleEditProducto = async () => {
+    if (!productoEditado.nombre || !productoEditado.precio || !productoEditado.categoria) {
+      alert("Por favor, completa todos los campos requeridos.");
+      return;
+    }
+    try {
+      const productoRef = doc(db, "productos", productoEditado.id);
+      await updateDoc(productoRef, productoEditado);
+      setShowEditModal(false);
+      await fetchData(); // Volvemos a obtener los datos actualizados
+    } catch (error) {
+      console.error("Error al actualizar producto:", error);
+    }
+  };
+
+  const productosCollection = collection(db, "productos");
+  const categoriasCollection = collection(db, "categorias");
+
+
+
+
+
 
   // Filtrar productos por categoría
   const productosFiltrados = categoriaSeleccionada === "Todas"
@@ -71,12 +123,22 @@ const Catalogo= () => {
       <Row>
         {productosFiltrados.length > 0 ? (
           productosFiltrados.map((producto) => (
-            <TarjetaProducto key={producto.id} producto={producto} />
-          ))
+            <TarjetaProducto key={producto.id} producto={producto}  openEditModal={openEditModal} productos={productos} />
+          ))  
         ) : (
           <p>No hay productos en esta categoría.</p>
         )}
       </Row>
+
+      <ModalEdicionProducto
+        showEditModal={showEditModal}
+        setShowEditModal={setShowEditModal}
+        productoEditado={productoEditado}
+        handleEditInputChange={handleEditInputChange}
+        handleEditImageChange={handleEditImageChange}
+        handleEditProducto={handleEditProducto}
+        categorias={categorias}
+      />
     </Container>
   );
 };
