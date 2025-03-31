@@ -1,5 +1,16 @@
 import React from "react";
 import { Modal, Form, Button } from "react-bootstrap";
+import ReactGA from "react-ga4";
+
+// Inicialización de ReactGA con múltiples trackers
+ReactGA.initialize([
+  {
+    trackingId: "G-71KQ8LCBB0",
+    gaOptions: {
+      siteSpeedSampleRate: 100
+    }
+  }
+]);
 
 const ModalRegistroProducto = ({
   showModal,
@@ -10,6 +21,22 @@ const ModalRegistroProducto = ({
   handleAddProducto,
   categorias
 }) => {
+  // Función para rastrear el registro de productos
+  const trackProductRegistration = () => {
+    ReactGA.event({
+      category: "Productos",
+      action: "Registro de Producto",
+      label: nuevoProducto.nombre,
+      value: nuevoProducto.precio
+    });
+  };
+
+  // Modificar handleAddProducto para incluir el tracking
+  const handleAddProductoWithTracking = () => {
+    handleAddProducto();
+    trackProductRegistration();
+  };
+
   return (
     <Modal show={showModal} onHide={() => setShowModal(false)}>
       <Modal.Header closeButton>
@@ -64,7 +91,7 @@ const ModalRegistroProducto = ({
         <Button variant="secondary" onClick={() => setShowModal(false)}>
           Cancelar
         </Button>
-        <Button variant="primary" onClick={handleAddProducto}>
+        <Button variant="primary" onClick={handleAddProductoWithTracking}>
           Guardar
         </Button>
       </Modal.Footer>
