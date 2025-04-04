@@ -14,6 +14,7 @@ import TablaProductos from "../components/products/TablaProductos";
 import ModalRegistroProducto from "../components/products/ModalRegistroProducto";
 import ModalEdicionProducto from "../components/products/ModalEdicionProducto";
 import ModalEliminacionProducto from "../components/products/ModalEliminacionProducto";
+import CuadroBusqueda from "../busqueda/CuadroBusqueda";
 
 const Productos = () => {
   // Estados para manejo de datos
@@ -30,6 +31,8 @@ const Productos = () => {
   });
   const [productoEditado, setProductoEditado] = useState(null);
   const [productoAEliminar, setProductoAEliminar] = useState(null);
+  const [searchText, setSearchText] = useState("");
+  const [productosFiltrados, setProductosFiltrados] = useState([]);
 
   // Referencia a las colecciones en Firestore
   const productosCollection = collection(db, "productos");
@@ -62,6 +65,22 @@ const Productos = () => {
   useEffect(() => {
     fetchData();
   }, []);
+
+  useEffect(() => {
+    setProductosFiltrados(productos);
+  }, [productos]);
+
+  const handleSearchChange = (e) => {
+    const text = e.target.value.toLowerCase();
+    setSearchText(text);
+
+    const filtrados = productos.filter((producto) =>
+      producto.nombre.toLowerCase().includes(text) ||
+      producto.categoria.toLowerCase().includes(text)
+    );
+
+    setProductosFiltrados(filtrados);
+  };
 
   // Manejador de cambios en inputs del formulario de nuevo producto
   const handleInputChange = (e) => {
@@ -164,8 +183,12 @@ const Productos = () => {
       <Button className="mb-3" onClick={() => setShowModal(true)}>
         Agregar producto
       </Button>
+      <CuadroBusqueda
+        searchText={searchText}
+        handleSearchChange={handleSearchChange}
+      />
       <TablaProductos
-        productos={productos}
+        productos={productosFiltrados}
         openEditModal={openEditModal}
         openDeleteModal={openDeleteModal}
       />

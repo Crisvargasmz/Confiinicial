@@ -7,6 +7,7 @@ import {  collection,
   doc,} from "firebase/firestore";
 import TarjetaProducto from "../components/catalog/TarjetaProducto";
 import ModalEdicionProducto from "../components/products/ModalEdicionProducto";
+import CuadroBusqueda from "../busqueda/CuadroBusqueda";
 
 const Catalogo= () => {
   const [productos, setProductos] = useState([]);
@@ -14,6 +15,8 @@ const Catalogo= () => {
   const [categoriaSeleccionada, setCategoriaSeleccionada] = useState("Todas");
   const [showEditModal, setShowEditModal] = useState(false);
   const [productoEditado, setProductoEditado] = useState(null);
+  const [searchText, setSearchText] = useState("");
+  const [productosFiltrados, setProductosFiltrados] = useState([]);
 
   const fetchData = async () => {
     try {
@@ -41,6 +44,22 @@ const Catalogo= () => {
     useEffect(() => {
       fetchData();
     }, []);
+
+  useEffect(() => {
+    setProductosFiltrados(productos);
+  }, [productos]);
+
+  const handleSearchChange = (e) => {
+    const text = e.target.value.toLowerCase();
+    setSearchText(text);
+
+    const filtrados = productos.filter((producto) =>
+      producto.nombre.toLowerCase().includes(text) ||
+      producto.categoria.toLowerCase().includes(text)
+    );
+
+    setProductosFiltrados(filtrados);
+  };
 
       // Función para abrir el modal de edición con datos prellenados
   const openEditModal = (producto) => {
@@ -85,15 +104,12 @@ const Catalogo= () => {
   const productosCollection = collection(db, "productos");
   const categoriasCollection = collection(db, "categorias");
 
-
-
-
-
-
-  // Filtrar productos por categoría
-  const productosFiltrados = categoriaSeleccionada === "Todas"
-    ? productos
-    : productos.filter((producto) => producto.categoria === categoriaSeleccionada);
+  useEffect(() => {
+    const filtrados = categoriaSeleccionada === "Todas"
+      ? productos
+      : productos.filter((producto) => producto.categoria === categoriaSeleccionada);
+    setProductosFiltrados(filtrados);
+  }, [productos, categoriaSeleccionada]);
 
   return (
     <Container className="mt-5">
@@ -119,12 +135,17 @@ const Catalogo= () => {
         </Col>
       </Row>
 
+      <CuadroBusqueda
+        searchText={searchText}
+        handleSearchChange={handleSearchChange}
+      />
+
       {/* Catálogo de productos filtrados */}
       <Row>
         {productosFiltrados.length > 0 ? (
           productosFiltrados.map((producto) => (
-            <TarjetaProducto key={producto.id} producto={producto}  openEditModal={openEditModal} productos={productos} />
-          ))  
+            <TarjetaProducto key={producto.id} producto={producto} openEditModal={openEditModal} productos={productos} />
+          ))
         ) : (
           <p>No hay productos en esta categoría.</p>
         )}
