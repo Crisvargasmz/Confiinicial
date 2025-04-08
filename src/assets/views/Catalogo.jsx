@@ -8,6 +8,8 @@ import {  collection,
 import TarjetaProducto from "../components/catalog/TarjetaProducto";
 import ModalEdicionProducto from "../components/products/ModalEdicionProducto";
 import CuadroBusqueda from "../busqueda/CuadroBusqueda";
+import Paginacion from "../components/ordenamiento/Paginacion";
+import "../styles/Catalogo.css";
 
 const Catalogo= () => {
   const [productos, setProductos] = useState([]);
@@ -17,6 +19,14 @@ const Catalogo= () => {
   const [productoEditado, setProductoEditado] = useState(null);
   const [searchText, setSearchText] = useState("");
   const [productosFiltrados, setProductosFiltrados] = useState([]);
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 8; // 8 productos por página para mejor distribución en la cuadrícula
+
+  // Calcular productos paginados
+  const paginatedProductos = productosFiltrados.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
 
   const fetchData = async () => {
     try {
@@ -112,7 +122,7 @@ const Catalogo= () => {
   }, [productos, categoriaSeleccionada]);
 
   return (
-    <Container className="mt-5">
+    <Container className="mt-5 catalogo-container">
       <br />
       <h4>Catálogo de Productos</h4>
       {/* Filtro de categorías */}
@@ -141,15 +151,30 @@ const Catalogo= () => {
       />
 
       {/* Catálogo de productos filtrados */}
-      <Row>
-        {productosFiltrados.length > 0 ? (
-          productosFiltrados.map((producto) => (
-            <TarjetaProducto key={producto.id} producto={producto} openEditModal={openEditModal} productos={productos} />
+      <Row className="g-4">
+        {paginatedProductos.length > 0 ? (
+          paginatedProductos.map((producto) => (
+            <TarjetaProducto 
+              key={producto.id} 
+              producto={producto} 
+              openEditModal={openEditModal} 
+            />
           ))
         ) : (
-          <p>No hay productos en esta categoría.</p>
+          <Col>
+            <p>No hay productos en esta categoría.</p>
+          </Col>
         )}
       </Row>
+
+      <div className="paginacion-container">
+        <Paginacion
+          itemsPerPage={itemsPerPage}
+          totalItems={productosFiltrados.length}
+          currentPage={currentPage}
+          setCurrentPage={setCurrentPage}
+        />
+      </div>
 
       <ModalEdicionProducto
         showEditModal={showEditModal}

@@ -16,6 +16,7 @@ import ModalEdicionProducto from "../components/products/ModalEdicionProducto";
 import ModalEliminacionProducto from "../components/products/ModalEliminacionProducto";
 import CuadroBusqueda from "../busqueda/CuadroBusqueda";
 
+
 const Productos = () => {
   // Estados para manejo de datos
   const [productos, setProductos] = useState([]);
@@ -33,10 +34,20 @@ const Productos = () => {
   const [productoAEliminar, setProductoAEliminar] = useState(null);
   const [searchText, setSearchText] = useState("");
   const [productosFiltrados, setProductosFiltrados] = useState([]);
+  
 
   // Referencia a las colecciones en Firestore
   const productosCollection = collection(db, "productos");
   const categoriasCollection = collection(db, "categorias");
+
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 5; // Número de productos por página
+
+   // Calcular productos paginados
+   const paginatedProductos = productosFiltrados.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
 
   // Función para obtener todas las categorías y productos de Firestore
   const fetchData = async () => {
@@ -187,11 +198,18 @@ const Productos = () => {
         searchText={searchText}
         handleSearchChange={handleSearchChange}
       />
-      <TablaProductos
-        productos={productosFiltrados}
-        openEditModal={openEditModal}
-        openDeleteModal={openDeleteModal}
-      />
+   <TablaProductos
+    openEditModal={openEditModal}
+    openDeleteModal={openDeleteModal}
+    productos={paginatedProductos} // Pasar productos paginados
+    totalItems={productos.length} // Total de productos
+    itemsPerPage={itemsPerPage}   // Elementos por página
+    currentPage={currentPage}     // Página actual
+    setCurrentPage={setCurrentPage} // Método para cambiar página
+  />
+
+
+
       <ModalRegistroProducto
         showModal={showModal}
         setShowModal={setShowModal}

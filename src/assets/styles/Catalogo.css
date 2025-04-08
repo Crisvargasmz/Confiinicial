@@ -1,0 +1,56 @@
+.catalogo-container {
+    padding: 20px;
+}
+
+.tarjeta-producto {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    transition: transform 0.3s ease;
+}
+
+.tarjeta-producto:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.tarjeta-imagen {
+    height: 200px;
+    object-fit: cover;
+    width: 100%;
+}
+
+.tarjeta-cuerpo {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.tarjeta-titulo {
+    font-size: 1.1rem;
+    margin-bottom: 0.5rem;
+    color: #333;
+}
+
+.tarjeta-texto {
+    color: #666;
+    margin-bottom: 1rem;
+}
+
+.tarjeta-precio {
+    font-weight: bold;
+    color: #28a745;
+    font-size: 1.2rem;
+}
+
+.tarjeta-categoria {
+    font-size: 0.9rem;
+    color: #6c757d;
+}
+
+.paginacion-container {
+    margin-top: 2rem;
+    display: flex;
+    justify-content: center;
+} 

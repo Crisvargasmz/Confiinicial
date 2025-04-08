@@ -34,9 +34,17 @@ const Categorias = () => {
   const [categoriaAEliminar, setCategoriaAEliminar] = useState(null);
   const [categoriasFiltradas, setCategoriasFiltradas] = useState([]);
   const [searchText, setSearchText] = useState(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 5;
 
   // Referencia a la colección de categorías en Firestore
   const categoriasCollection = collection(db, "categorias");
+
+  // Calcular categorías paginadas
+  const paginatedCategorias = categoriasFiltradas.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
 
   // Función para obtener todas las categorías de Firestore
   const fetchCategorias = async () => {
@@ -161,9 +169,13 @@ const Categorias = () => {
 
 
       <TablaCategorias
-        categorias={categoriasFiltradas}
+        categorias={paginatedCategorias}
         openEditModal={openEditModal}
         openDeleteModal={openDeleteModal}
+        totalItems={categoriasFiltradas.length}
+        itemsPerPage={itemsPerPage}
+        currentPage={currentPage}
+        setCurrentPage={setCurrentPage}
       />
       <ModalRegistroCategoria
         showModal={showModal}
