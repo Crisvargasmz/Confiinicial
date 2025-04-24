@@ -4,12 +4,13 @@ import { Container, Button } from "react-bootstrap";
 import { db } from "../database/firebaseconfig";
 import {
   collection,
-  getDocs,
   addDoc,
   updateDoc,
   deleteDoc,
   doc,
+  onSnapshot,
 } from "firebase/firestore";
+
 import TablaProductos from "../components/products/TablaProductos";
 import ModalRegistroProducto from "../components/products/ModalRegistroProducto";
 import ModalEdicionProducto from "../components/products/ModalEdicionProducto";
@@ -43,6 +44,24 @@ const Productos = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 5; // Número de productos por página
 
+  const [isOffline, setIsOffline] = useState(!navigator.onLine);
+
+  useEffect(() => {
+  const handleOnline = () => {
+    setIsOffline(false);
+  };
+  const handleOffline = () => {
+    setIsOffline(true);
+  };
+  window.addEventListener("online", handleOnline);
+  window.addEventListener("offline", handleOffline);
+  setIsOffline(!navigator.onLine);
+  return () => {
+    window.removeEventListener("online", handleOnline);
+    window.removeEventListener("offline", handleOffline);
+  };
+}, []);
+
    // Calcular productos paginados
    const paginatedProductos = productosFiltrados.slice(
     (currentPage - 1) * itemsPerPage,
@@ -50,27 +69,53 @@ const Productos = () => {
   );
 
   // Función para obtener todas las categorías y productos de Firestore
-  const fetchData = async () => {
-    try {
-      // Obtener productos
-      const productosData = await getDocs(productosCollection);
-      const fetchedProductos = productosData.docs.map((doc) => ({
+  const fetchData = () => {
+    // Escuchar productos
+    const unsubscribeProductos = onSnapshot(productosCollection, (snapshot) => {
+      const fetchedProductos = snapshot.docs.map((doc) => ({
         ...doc.data(),
         id: doc.id,
       }));
       setProductos(fetchedProductos);
+      setProductosFiltrados(fetchedProductos);
+      if (isOffline) {
+        console.log("Offline: Productos cargados desde caché local.");
+      }
+    }, (error) => {
+      console.error("Error al escuchar productos:", error);
+      if (isOffline) {
+        console.log("Offline: Mostrando datos desde caché local.");
+      } else {
+        alert("Error al cargar productos: " + error.message);
+      }
+    });
 
-      // Obtener categorías
-      const categoriasData = await getDocs(categoriasCollection);
-      const fetchedCategorias = categoriasData.docs.map((doc) => ({
-        ...doc.data(),
-        id: doc.id,
-      }));
-      setCategorias(fetchedCategorias);
-    } catch (error) {
-      console.error("Error al obtener datos:", error);
-    }
-  };
+       // Escuchar categorías
+       const unsubscribeCategorias = onSnapshot(categoriasCollection, (snapshot) => {
+        const fetchedCategorias = snapshot.docs.map((doc) => ({
+          ...doc.data(),
+          id: doc.id,
+        }));
+        setCategorias(fetchedCategorias);
+        if (isOffline) {
+          console.log("Offline: Categorías cargadas desde caché local.");
+        }
+      }, (error) => {
+        console.error("Error al escuchar categorías:", error);
+        if (isOffline) {
+          console.log("Offline: Mostrando categorías desde caché local.");
+        } else {
+          alert("Error al cargar categorías: " + error.message);
+        }
+      });
+  
+      return () => {
+        unsubscribeProductos();
+        unsubscribeCategorias();
+      };
+    };
+
+
 
   // Hook useEffect para carga inicial de datos
   useEffect(() => {
@@ -128,51 +173,172 @@ const Productos = () => {
     }
   };
 
-  // Función para agregar un nuevo producto (CREATE)
-  const handleAddProducto = async () => {
-    if (!nuevoProducto.nombre || !nuevoProducto.precio || !nuevoProducto.categoria) {
-      alert("Por favor, completa todos los campos requeridos.");
+    const handleAddProducto = async () => {
+    // Validar campos requeridos
+    if (
+      !nuevoProducto.nombre ||
+      !nuevoProducto.precio ||
+      !nuevoProducto.categoria ||
+      !nuevoProducto.imagen
+    ) {
+      alert("Por favor, completa todos los campos, incluyendo la imagen.");
       return;
     }
+
+    // Cerrar modal
+    setShowModal(false);
+
+    // Crear ID temporal y objeto del producto
+    const tempId = `temp_${Date.now()}`;
+    const productoConId = {
+      ...nuevoProducto,
+      id: tempId,
+      precio: parseFloat(nuevoProducto.precio), // Asegurar que precio sea número
+    };
+
     try {
-      await addDoc(productosCollection, nuevoProducto);
-      setShowModal(false);
+      // Actualizar estado local
+      setProductos((prev) => [...prev, productoConId]);
+      setProductosFiltrados((prev) => [...prev, productoConId]);
+
+      // Mensaje según estado de conexión
+      if (isOffline) {
+        console.log("Producto agregado localmente (sin conexión).");
+        alert("Sin conexión: Producto agregado localmente. Se sincronizará al reconectar.");
+      } else {
+        console.log("Producto agregado exitosamente en la nube.");
+      }
+
+      // Guardar en Firestore
+      await addDoc(productosCollection, {
+        nombre: nuevoProducto.nombre,
+        precio: parseFloat(nuevoProducto.precio),
+        categoria: nuevoProducto.categoria,
+        imagen: nuevoProducto.imagen,
+      });
+
+      // Limpiar formulario
       setNuevoProducto({ nombre: "", precio: "", categoria: "", imagen: "" });
-      await fetchData();
     } catch (error) {
-      console.error("Error al agregar producto:", error);
-    }
-  };
-
-  // Función para actualizar un producto existente (UPDATE)
-  const handleEditProducto = async () => {
-    if (!productoEditado.nombre || !productoEditado.precio || !productoEditado.categoria) {
-      alert("Por favor, completa todos los campos requeridos.");
-      return;
-    }
-    try {
-      const productoRef = doc(db, "productos", productoEditado.id);
-      await updateDoc(productoRef, productoEditado);
-      setShowEditModal(false);
-      await fetchData();
-    } catch (error) {
-      console.error("Error al actualizar producto:", error);
-    }
-  };
-
-  // Función para eliminar un producto (DELETE)
-  const handleDeleteProducto = async () => {
-    if (productoAEliminar) {
-      try {
-        const productoRef = doc(db, "productos", productoAEliminar.id);
-        await deleteDoc(productoRef);
-        setShowDeleteModal(false);
-        await fetchData();
-      } catch (error) {
-        console.error("Error al eliminar producto:", error);
+      console.error("Error al agregar el producto:", error);
+      if (isOffline) {
+        console.log("Offline: Producto almacenado localmente.");
+      } else {
+        // Revertir cambios locales si falla en la nube
+        setProductos((prev) => prev.filter((prod) => prod.id !== tempId));
+        setProductosFiltrados((prev) => prev.filter((prod) => prod.id !== tempId));
+        alert("Error al agregar el producto: " + error.message);
       }
     }
   };
+
+  const handleEditProducto = async () => {
+    // Validar campos requeridos
+    if (
+      !productoEditado.nombre ||
+      !productoEditado.precio ||
+      !productoEditado.categoria ||
+      !productoEditado.imagen
+    ) {
+      alert("Por favor, completa todos los campos, incluyendo la imagen.");
+      return;
+    }
+
+    // Cerrar modal
+    setShowEditModal(false);
+
+    const productoRef = doc(db, "productos", productoEditado.id);
+
+    try {
+      // Actualizar estado local
+      setProductos((prev) =>
+        prev.map((prod) =>
+          prod.id === productoEditado.id
+            ? { ...productoEditado, precio: parseFloat(productoEditado.precio) }
+            : prod
+        )
+      );
+      setProductosFiltrados((prev) =>
+        prev.map((prod) =>
+          prod.id === productoEditado.id
+            ? { ...productoEditado, precio: parseFloat(productoEditado.precio) }
+            : prod
+        )
+      );
+
+      // Mensaje según estado de conexión
+      if (isOffline) {
+        console.log("Producto actualizado localmente (sin conexión).");
+        alert("Sin conexión: Producto actualizado localmente. Se sincronizará al reconectar.");
+      } else {
+        console.log("Producto actualizado exitosamente en la nube.");
+      }
+
+      // Actualizar en Firestore
+      await updateDoc(productoRef, {
+        nombre: productoEditado.nombre,
+        precio: parseFloat(productoEditado.precio),
+        categoria: productoEditado.categoria,
+        imagen: productoEditado.imagen,
+      });
+
+    } catch (error) {
+      console.error("Error al actualizar el producto:", error);
+      if (isOffline) {
+        console.log("Offline: Producto actualizado localmente.");
+      } else {
+        // Revertir cambios locales si falla en la nube
+        setProductos((prev) =>
+          prev.map((prod) =>
+            prod.id === productoEditado.id ? { ...prod } : prod
+          )
+        );
+        setProductosFiltrados((prev) =>
+          prev.map((prod) =>
+            prod.id === productoEditado.id ? { ...prod } : prod
+          )
+        );
+        alert("Error al actualizar el producto: " + error.message);
+      }
+    }
+  };
+
+  const handleDeleteProducto = async () => {
+    if (!productoAEliminar) return;
+
+    // Cerrar modal
+    setShowDeleteModal(false);
+
+    try {
+      // Actualizar estado local
+      setProductos((prev) => prev.filter((prod) => prod.id !== productoAEliminar.id));
+      setProductosFiltrados((prev) => prev.filter((prod) => prod.id !== productoAEliminar.id));
+
+      // Mensaje según estado de conexión
+      if (isOffline) {
+        console.log("Producto eliminado localmente (sin conexión).");
+        alert("Sin conexión: Producto eliminado localmente. Se sincronizará al reconectar.");
+      } else {
+        console.log("Producto eliminado exitosamente en la nube.");
+      }
+
+      // Eliminar en Firestore
+      const productoRef = doc(db, "productos", productoAEliminar.id);
+      await deleteDoc(productoRef);
+
+    } catch (error) {
+      console.error("Error al eliminar el producto:", error);
+      if (isOffline) {
+        console.log("Offline: Eliminación almacenada localmente.");
+      } else {
+        // Restaurar producto en estado local si falla en la nube
+        setProductos((prev) => [...prev, productoAEliminar]);
+        setProductosFiltrados((prev) => [...prev, productoAEliminar]);
+        alert("Error al eliminar el producto: " + error.message);
+      }
+    }
+  };
+
 
   // Función para abrir el modal de edición con datos prellenados
   const openEditModal = (producto) => {
