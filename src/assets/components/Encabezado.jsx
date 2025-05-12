@@ -105,6 +105,15 @@ const Encabezado = () => {
 
               </Nav.Link>
 
+              <Nav.Link
+                onClick={() => handleNavigate("/estadisticas")}
+                className={isCollapsed ? "color-texto-marca" : "text-white"}
+              >
+                {isCollapsed ? <i className="bi-cloud-sun-fill me-2"></i> : null}
+                <strong>Estadisticas</strong>
+
+              </Nav.Link>
+
 
               {isLoggedIn ? (
                 <>
