@@ -4,7 +4,7 @@ import QRCode from "react-qr-code";
 const ModalQR = ({ show, handleClose, qrUrl }) => {
     return (
         <Modal show={show} onHide={handleClose} centered>
-            <Modal.Title>Codigo QR del PDF</Modal.Title>
+            <Modal.Title>Codigo QR del Video</Modal.Title>
             <Modal.Body className="text-center">
                 {qrUrl ? (
                     <QRCode
