@@ -3,55 +3,40 @@ import { Table, Button, Image } from "react-bootstrap";
 import "bootstrap-icons/font/bootstrap-icons.css";
 import Paginacion from "../ordenamiento/Paginacion";
 
-const TablaProductos = ({ productos, openEditModal, openDeleteModal, totalItems,
+const TablaLibros = ({ libros, openEditModal, openDeleteModal, totalItems,
   itemsPerPage,
   currentPage,
-  setCurrentPage,
-  handleCopy }) => {
+  setCurrentPage }) => {
   return (
     <>
       <Table striped bordered hover responsive>
         <thead>
           <tr>
-            <th>Imagen</th>
-            <th>Nombre</th>
-            <th>Precio</th>
+            <th>Título</th>
+            <th>Autor</th>
             <th>Categoría</th>
             <th>Acciones</th>
           </tr>
         </thead>
         <tbody>
-          {productos.map((producto) => (
-            <tr key={producto.id}>
+          {libros.map((libro) => (
+            <tr key={libro.id}>
+              <td>{libro.titulo}</td>
+              <td>{libro.autor}</td>
+              <td>{libro.categoria}</td>
               <td>
-                {producto.imagen && (
-                  <Image src={producto.imagen} width="50" height="50" />
-                )}
-              </td>
-              <td>{producto.nombre}</td>
-              <td>C${producto.precio}</td>
-              <td>{producto.categoria}</td>
-              <td>
-                <Button
-                  variant="outline-info"
-                  size="sm"
-                  className="me-2"
-                  onClick={() => handleCopy(producto)}
-                >
-                  <i className="bi bi-clipboard"></i>
-                </Button>
                 <Button
                   variant="outline-warning"
                   size="sm"
                   className="me-2"
-                  onClick={() => openEditModal(producto)}
+                  onClick={() => openEditModal(libro)}
                 >
                   <i className="bi bi-pencil"></i>
                 </Button>
                 <Button
                   variant="outline-danger"
                   size="sm"
-                  onClick={() => openDeleteModal(producto)}
+                  onClick={() => openDeleteModal(libro)}
                 >
                   <i className="bi bi-trash"></i>
                 </Button>
@@ -70,4 +55,4 @@ const TablaProductos = ({ productos, openEditModal, openDeleteModal, totalItems,
   );
 };
 
-export default TablaProductos;
+export default TablaLibros; 

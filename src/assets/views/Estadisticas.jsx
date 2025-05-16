@@ -34,7 +34,7 @@ return (
         </Col>
         </Row>
     </Container>
-)
-}
+);
+};
 
 export default Estadisticas;

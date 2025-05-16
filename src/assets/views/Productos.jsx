@@ -1,6 +1,6 @@
 // Importaciones
 import React, { useState, useEffect } from "react";
-import { Container, Button } from "react-bootstrap";
+import { Container, Button, Toast } from "react-bootstrap";
 import { db } from "../database/firebaseconfig";
 import {
   collection,
@@ -35,6 +35,8 @@ const Productos = () => {
   const [productoAEliminar, setProductoAEliminar] = useState(null);
   const [searchText, setSearchText] = useState("");
   const [productosFiltrados, setProductosFiltrados] = useState([]);
+  const [showToast, setShowToast] = useState(false);
+  const [toastMsg, setToastMsg] = useState("");
   
 
   // Referencia a las colecciones en Firestore
@@ -352,6 +354,27 @@ const Productos = () => {
     setShowDeleteModal(true);
   };
 
+  // Método para copiar datos de una fila al portapapeles
+  const handleCopy = (producto) => {
+    if (!producto || (!producto.nombre && !producto.precio && !producto.categoria)) {
+      setToastMsg("No hay datos para copiar.");
+      setShowToast(true);
+      return;
+    }
+    const rowData = `Nombre: ${producto.nombre}\nPrecio: C$${producto.precio}\nCategoría: ${producto.categoria}`;
+    navigator.clipboard
+      .writeText(rowData)
+      .then(() => {
+        setToastMsg("¡Datos copiados al portapapeles!");
+        setShowToast(true);
+      })
+      .catch((err) => {
+        setToastMsg("Error al copiar al portapapeles");
+        setShowToast(true);
+        console.error("Error al copiar al portapapeles:", err);
+      });
+  };
+
   // Renderizado del componente
   return (
     <Container className="mt-5">
@@ -367,11 +390,12 @@ const Productos = () => {
    <TablaProductos
     openEditModal={openEditModal}
     openDeleteModal={openDeleteModal}
-    productos={paginatedProductos} // Pasar productos paginados
-    totalItems={productos.length} // Total de productos
-    itemsPerPage={itemsPerPage}   // Elementos por página
-    currentPage={currentPage}     // Página actual
-    setCurrentPage={setCurrentPage} // Método para cambiar página
+    productos={paginatedProductos}
+    totalItems={productos.length}
+    itemsPerPage={itemsPerPage}
+    currentPage={currentPage}
+    setCurrentPage={setCurrentPage}
+    handleCopy={handleCopy}
   />
 
 
@@ -399,6 +423,15 @@ const Productos = () => {
         setShowDeleteModal={setShowDeleteModal}
         handleDeleteProducto={handleDeleteProducto}
       />
+      <Toast
+        onClose={() => setShowToast(false)}
+        show={showToast}
+        delay={2000}
+        autohide
+        style={{ position: 'fixed', top: 20, right: 20, zIndex: 9999 }}
+      >
+        <Toast.Body>{toastMsg}</Toast.Body>
+      </Toast>
     </Container>
   );
 };

@@ -1,14 +1,14 @@
-
 import { initializeApp } from "firebase/app";
 import { initializeFirestore, persistentLocalCache } from "firebase/firestore";
 import { getAuth } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
+import { getStorage } from "firebase/storage";
 
 const firebaseConfig = {
   apiKey: "AIzaSyAsvhPa3B8EbrWC6MkJdFJ1kxh-nAlQdLs",
   authDomain: "graficos-fed6b.firebaseapp.com",
   projectId: "graficos-fed6b",
-  storageBucket: "graficos-fed6b.firebasestorage.app",
+  storageBucket: "graficos-fed6b.appspot.com",
   messagingSenderId: "154951536645",
   appId: "1:154951536645:web:c26314fc1d694a13148c6c"
 };
@@ -31,4 +31,6 @@ try {
   db = initializeFirestore(appfirebase, {});
 }
 
-export { appfirebase, auth, db };
+const storage = getStorage(appfirebase);
+
+export { appfirebase, auth, db, storage };
