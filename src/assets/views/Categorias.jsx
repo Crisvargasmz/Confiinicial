@@ -18,7 +18,7 @@ import ModalRegistroCategoria from "../components/categories/ModalRegistroCatego
 import ModalEdicionCategoria from "../components/categories/ModalEdicionCategoria";
 import ModalEliminacionCategoria from "../components/categories/ModalEliminacionCategoria";
 import CuadroBusqueda from "../busqueda/CuadroBusqueda";
-
+import ChatIA from "../components/chat/ChatIA";
 
 const Categorias = () => {
   
@@ -27,6 +27,7 @@ const Categorias = () => {
   const [showModal, setShowModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [showChatModal, setShowChatModal] = useState(false);
   const [nuevaCategoria, setNuevaCategoria] = useState({
     nombre: "",
     descripcion: "",
@@ -284,6 +285,9 @@ const Categorias = () => {
       <Button className="mb-3" onClick={() => setShowModal(true)}>
         Agregar categoría
       </Button>
+      <Button className="mb-3" onClick={() => setShowChatModal(true)} style={{ width: "100%" }}>
+        Chat IA
+      </Button>
       <CuadroBusqueda
         searchText={searchText}
         handleSearchChange={handleSearchChange}
@@ -318,6 +322,7 @@ const Categorias = () => {
         setShowDeleteModal={setShowDeleteModal}
         handleDeleteCategoria={handleDeleteCategoria}
       />
+      <ChatIA showChatModal={showChatModal} setShowChatModal={setShowChatModal} />
     </Container>
   );
 };
