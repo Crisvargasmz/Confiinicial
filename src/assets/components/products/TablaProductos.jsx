@@ -3,11 +3,12 @@ import { Table, Button, Image } from "react-bootstrap";
 import "bootstrap-icons/font/bootstrap-icons.css";
 import Paginacion from "../ordenamiento/Paginacion";
 
-const TablaProductos = ({ productos, openEditModal, openDeleteModal, totalItems,
+const TablaProductos = ({ productos, openEditModal, openDeleteModal, totalItems,generarPDFDetalleProducto,
   itemsPerPage,
   currentPage,
   setCurrentPage,
-  handleCopy }) => {
+  handleCopy,
+  handleShowQR }) => {
   return (
     <>
       <Table striped bordered hover responsive>
@@ -55,6 +56,24 @@ const TablaProductos = ({ productos, openEditModal, openDeleteModal, totalItems,
                 >
                   <i className="bi bi-trash"></i>
                 </Button>
+                <Button
+                  variant="outline-primary"
+                  size="sm"
+                  className="me-2"
+                  onClick={() => handleShowQR(producto)}
+                >
+                  <i className="bi bi-qr-code"></i>
+                </Button>
+                <Button
+                  variant="outline-success"
+                  size="sm"
+                  className="me-2"
+                  onClick={() => generarPDFDetalleProducto(producto)}
+                > 
+                  <i className="bi bi-file-pdf"></i>
+                </Button>
+
+
               </td>
             </tr>
           ))}
