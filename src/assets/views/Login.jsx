@@ -6,6 +6,7 @@ import { appfirebase } from "../database/firebaseconfig";
 import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
 import { useAuth } from "../database/authcontext";
 import "../../App.css";
+import { useTranslation } from 'react-i18next';
 
 const Login = () => {
   const [email, setEmail] = useState("");
@@ -14,6 +15,7 @@ const Login = () => {
 
   const { user } = useAuth();
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -23,15 +25,15 @@ const Login = () => {
       .then((userCredential) => {
         console.log("Usuario autenticado:", userCredential.user);
         // Guardar las credenciales en localStorage
-        localStorage.setItem("adminEmail", email);
+         localStorage.setItem("adminEmail", email);
         localStorage.setItem("adminPassword", password);
         // Redirigir después de iniciar sesión
         navigate("/inicio");
       })
       .catch((error) => {
-        setError("Error de autenticación. Verifica tus credenciales.");
+        setError(t("login.errorAutenticacion"));
         console.error(error);
-      });
+      });                     
   };
 
   // Si el usuario ya está autenticado, redirigir automáticamente

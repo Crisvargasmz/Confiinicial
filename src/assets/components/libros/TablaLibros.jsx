@@ -2,20 +2,23 @@ import React from "react";
 import { Table, Button, Image } from "react-bootstrap";
 import "bootstrap-icons/font/bootstrap-icons.css";
 import Paginacion from "../ordenamiento/Paginacion";
+import { useTranslation } from 'react-i18next';
 
 const TablaLibros = ({ libros, openEditModal, openDeleteModal, totalItems,
   itemsPerPage,
   currentPage,
   setCurrentPage }) => {
+  const { t } = useTranslation();
+  
   return (
     <>
       <Table striped bordered hover responsive>
         <thead>
           <tr>
-            <th>Título</th>
-            <th>Autor</th>
-            <th>Categoría</th>
-            <th>Acciones</th>
+            <th>{t("libros.tituloLibro")}</th>
+            <th>{t("libros.autor")}</th>
+            <th>{t("libros.categoria")}</th>
+            <th>{t("common.acciones")}</th>
           </tr>
         </thead>
         <tbody>
@@ -30,6 +33,7 @@ const TablaLibros = ({ libros, openEditModal, openDeleteModal, totalItems,
                   size="sm"
                   className="me-2"
                   onClick={() => openEditModal(libro)}
+                  title={t("common.editar")}
                 >
                   <i className="bi bi-pencil"></i>
                 </Button>
@@ -37,6 +41,7 @@ const TablaLibros = ({ libros, openEditModal, openDeleteModal, totalItems,
                   variant="outline-danger"
                   size="sm"
                   onClick={() => openDeleteModal(libro)}
+                  title={t("common.eliminar")}
                 >
                   <i className="bi bi-trash"></i>
                 </Button>

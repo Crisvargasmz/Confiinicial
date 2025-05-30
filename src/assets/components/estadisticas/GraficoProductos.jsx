@@ -1,14 +1,15 @@
 import {Card} from "react-bootstrap";
 import { Bar } from "react-chartjs-2";
 import { Chart} from "chart.js/auto";
-
+import { useTranslation } from 'react-i18next';
 
 const GraficoProductos = ({nombres, precios}) => {
+    const { t } = useTranslation();
 
     const data = {
         labels: nombres,
         datasets: [{
-            label: 'Precio (C$)',
+            label: t("estadisticas.precio"),
             data: precios,
             backgroundColor: "rgba(75, 192, 192, 0.2)",
             borderColor: "rgba(75, 192, 192, 1)",
@@ -24,7 +25,7 @@ const GraficoProductos = ({nombres, precios}) => {
         },
         title: {
             display: true,
-            text: 'Precio de los productos',
+            text: t("estadisticas.graficoProductos"),
         },
      },
      scales: {
@@ -32,13 +33,13 @@ const GraficoProductos = ({nombres, precios}) => {
             beginAtZero: true,
             title: {
                 display: true,
-                text: 'Precio (C$)',
+                text: t("estadisticas.precio"),
             },
         },
         x: {
             title: {
                 display: true,
-                text: 'ProductoS',
+                text: t("estadisticas.producto"),
             },
         },
      },
@@ -48,7 +49,7 @@ const GraficoProductos = ({nombres, precios}) => {
        <div style={{width: '100%', height: '400px'}}>
         <Card>
             <Card.Body>
-                <Card.Title>Precio de los productos</Card.Title>
+                <Card.Title>{t("estadisticas.graficoProductos")}</Card.Title>
                 <Bar data={data} options={options} />
             </Card.Body>
         </Card>

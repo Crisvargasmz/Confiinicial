@@ -1,25 +1,28 @@
 import React from "react";
 import { Modal, Button } from "react-bootstrap";
+import { useTranslation } from 'react-i18next';
 
 const ModalEliminacionLibro = ({
   showDeleteModal,
   setShowDeleteModal,
   handleDeleteLibro,
 }) => {
+  const { t } = useTranslation();
+  
   return (
     <Modal show={showDeleteModal} onHide={() => setShowDeleteModal(false)}>
       <Modal.Header closeButton>
-        <Modal.Title>Confirmar Eliminación</Modal.Title>
+        <Modal.Title>{t("libros.eliminarLibro")}</Modal.Title>
       </Modal.Header>
       <Modal.Body>
-        ¿Estás seguro de que deseas eliminar este libro?
+        {t("libros.confirmarEliminacion")}
       </Modal.Body>
       <Modal.Footer>
         <Button variant="secondary" onClick={() => setShowDeleteModal(false)}>
-          Cancelar
+          {t("libros.cancelar")}
         </Button>
         <Button variant="danger" onClick={handleDeleteLibro}>
-          Eliminar
+          {t("common.eliminar")}
         </Button>
       </Modal.Footer>
     </Modal>

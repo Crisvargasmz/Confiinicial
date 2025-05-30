@@ -1,25 +1,29 @@
 import React from "react";
 import { Modal, Button } from "react-bootstrap";
+import { useTranslation } from 'react-i18next';
 
 const ModalEliminacionCategoria = ({
-  showDeleteModal,
-  setShowDeleteModal,
+  show,
+  onHide,
+  categoriaAEliminar,
   handleDeleteCategoria,
 }) => {
+  const { t } = useTranslation();
+
   return (
-    <Modal show={showDeleteModal} onHide={() => setShowDeleteModal(false)}>
+    <Modal show={show} onHide={onHide}>
       <Modal.Header closeButton>
-        <Modal.Title>Confirmar Eliminación</Modal.Title>
+        <Modal.Title>{t('common.confirmar')}</Modal.Title>
       </Modal.Header>
       <Modal.Body>
-        ¿Estás seguro de que deseas eliminar esta categoría?
+        {t('categorias.confirmarEliminar')}
       </Modal.Body>
       <Modal.Footer>
-        <Button variant="secondary" onClick={() => setShowDeleteModal(false)}>
-          Cancelar
+        <Button variant="secondary" onClick={onHide}>
+          {t('common.cancelar')}
         </Button>
         <Button variant="danger" onClick={handleDeleteCategoria}>
-          Eliminar
+          {t('common.eliminar')}
         </Button>
       </Modal.Footer>
     </Modal>

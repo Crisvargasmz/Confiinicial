@@ -2,8 +2,11 @@ import React, { useState, useEffect } from "react";
 import { Container, Row, Col } from "react-bootstrap";
 import FormularioUbicacion from "../components/clima/FormularioUbicacion";
 import TablaClima from "../components/clima/TablaClima";
+import { useTranslation } from 'react-i18next';
+
 
 const Clima = () => {
+  const { t } = useTranslation();
   const [ubicacion, setUbicacion] = useState({
     latitud: null,
     longitud: null,
@@ -147,7 +150,7 @@ const Clima = () => {
   return (
     <Container className="mt-5">
       <br />
-      <h4>Clima por Hora</h4>
+      <h4>{t("clima.titulo")}</h4>
       <br />
       <FormularioUbicacion
         ubicacionManual={ubicacionManual}
@@ -160,13 +163,13 @@ const Clima = () => {
       <Row className="mt-4">
         <Col>
           {cargando ? (
-            <p>Cargando datos del clima...</p>
+            <p>{t("clima.cargandoDatos")}</p>
           ) : errorClima ? (
             <p>{errorClima}</p>
           ) : datosPorHora.length > 0 ? (
             <TablaClima datosPorHora={datosPorHora} />
           ) : (
-            <p>Por favor, ingresa o detecta una ubicación válida.</p>
+            <p>{t("clima.ubicacionInvalida")}</p>
           )}
         </Col>
       </Row>

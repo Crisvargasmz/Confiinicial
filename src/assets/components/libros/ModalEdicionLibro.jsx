@@ -1,5 +1,6 @@
 import React from "react";
 import { Modal, Form, Button, Image } from "react-bootstrap";
+import { useTranslation } from 'react-i18next';
 
 const ModalEdicionLibro = ({
   showEditModal,
@@ -10,17 +11,19 @@ const ModalEdicionLibro = ({
   handleEditLibro,
   categorias
 }) => {
+  const { t } = useTranslation();
+  
   if (!libroEditado) return null;
 
   return (
     <Modal show={showEditModal} onHide={() => setShowEditModal(false)}>
       <Modal.Header closeButton>
-        <Modal.Title>Editar Libro</Modal.Title>
+        <Modal.Title>{t("libros.editarLibro")}</Modal.Title>
       </Modal.Header>
       <Modal.Body>
         <Form>
           <Form.Group className="mb-3">
-            <Form.Label>Título</Form.Label>
+            <Form.Label>{t("libros.tituloLibro")}</Form.Label>
             <Form.Control
               type="text"
               name="titulo"
@@ -29,7 +32,7 @@ const ModalEdicionLibro = ({
             />
           </Form.Group>
           <Form.Group className="mb-3">
-            <Form.Label>Autor</Form.Label>
+            <Form.Label>{t("libros.autor")}</Form.Label>
             <Form.Control
               type="text"
               name="autor"
@@ -38,13 +41,13 @@ const ModalEdicionLibro = ({
             />
           </Form.Group>
           <Form.Group className="mb-3">
-            <Form.Label>Categoría</Form.Label>
+            <Form.Label>{t("libros.categoria")}</Form.Label>
             <Form.Select
               name="categoria"
               value={libroEditado.categoria}
               onChange={handleEditInputChange}
             >
-              <option value="">Seleccione una categoría</option>
+              <option value="">{t("productos.seleccionarCategoria")}</option>
               {categorias.map((cat) => (
                 <option key={cat.id} value={cat.nombre}>
                   {cat.nombre}
@@ -53,7 +56,7 @@ const ModalEdicionLibro = ({
             </Form.Select>
           </Form.Group>
           <Form.Group className="mb-3">
-            <Form.Label>Imagen Actual</Form.Label>
+            <Form.Label>{t("productos.imagenActual")}</Form.Label>
             {libroEditado.imagen && (
               <Image src={libroEditado.imagen} width="100" className="mb-2" />
             )}
@@ -67,10 +70,10 @@ const ModalEdicionLibro = ({
       </Modal.Body>
       <Modal.Footer>
         <Button variant="secondary" onClick={() => setShowEditModal(false)}>
-          Cancelar
+          {t("libros.cancelar")}
         </Button>
         <Button variant="primary" onClick={handleEditLibro}>
-          Actualizar
+          {t("libros.guardar")}
         </Button>
       </Modal.Footer>
     </Modal>

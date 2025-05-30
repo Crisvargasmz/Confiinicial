@@ -1,5 +1,6 @@
 import React from "react";
 import { Modal, Form, Button } from "react-bootstrap";
+import { useTranslation } from 'react-i18next';
 
 const ModalRegistroLibro = ({
   showModal,
@@ -9,15 +10,17 @@ const ModalRegistroLibro = ({
   handleAddLibro,
   categorias
 }) => {
+  const { t } = useTranslation();
+  
   return (
     <Modal show={showModal} onHide={() => setShowModal(false)}>
       <Modal.Header closeButton>
-        <Modal.Title>Agregar Libro</Modal.Title>
+        <Modal.Title>{t("libros.agregarLibro")}</Modal.Title>
       </Modal.Header>
       <Modal.Body>
         <Form>
           <Form.Group className="mb-3">
-            <Form.Label>Título</Form.Label>
+            <Form.Label>{t("libros.tituloLibro")}</Form.Label>
             <Form.Control
               type="text"
               name="titulo"
@@ -26,7 +29,7 @@ const ModalRegistroLibro = ({
             />
           </Form.Group>
           <Form.Group className="mb-3">
-            <Form.Label>Autor</Form.Label>
+            <Form.Label>{t("libros.autor")}</Form.Label>
             <Form.Control
               type="text"
               name="autor"
@@ -35,13 +38,13 @@ const ModalRegistroLibro = ({
             />
           </Form.Group>
           <Form.Group className="mb-3">
-            <Form.Label>Categoría</Form.Label>
+            <Form.Label>{t("libros.categoria")}</Form.Label>
             <Form.Select
               name="categoria"
               value={nuevoLibro.categoria}
               onChange={handleInputChange}
             >
-              <option value="">Seleccione una categoría</option>
+              <option value="">{t("productos.seleccionarCategoria")}</option>
               {categorias.map((cat) => (
                 <option key={cat.id} value={cat.nombre}>
                   {cat.nombre}
@@ -53,10 +56,10 @@ const ModalRegistroLibro = ({
       </Modal.Body>
       <Modal.Footer>
         <Button variant="secondary" onClick={() => setShowModal(false)}>
-          Cancelar
+          {t("libros.cancelar")}
         </Button>
         <Button variant="primary" onClick={handleAddLibro}>
-          Guardar
+          {t("libros.guardar")}
         </Button>
       </Modal.Footer>
     </Modal>

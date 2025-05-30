@@ -15,8 +15,10 @@ import ModalRegistroLibro from "../components/libros/ModalRegistroLibro";
 import ModalEdicionLibro from "../components/libros/ModalEdicionLibro";
 import ModalEliminacionLibro from "../components/libros/ModalEliminacionLibro";
 import CuadroBusqueda from "../busqueda/CuadroBusqueda";
+import { useTranslation } from 'react-i18next';
 
 const Libros = () => {
+  const { t } = useTranslation();
   const [libros, setLibros] = useState([]);
   const [categorias, setCategorias] = useState([]);
   const [showModal, setShowModal] = useState(false);
@@ -209,13 +211,13 @@ const Libros = () => {
     setLibroAEliminar(libro);
     setShowDeleteModal(true);
   };
-
+  
   return (
     <Container className="mt-5">
       <br />
-      <h4>Gestión de Libros</h4>
+      <h4>{t("libros.titulo")}</h4>
       <Button className="mb-3" onClick={() => setShowModal(true)}>
-        Agregar libro
+        {t("libros.agregarLibro")}
       </Button>
       <CuadroBusqueda
         searchText={searchText}

@@ -10,6 +10,8 @@ import ModalEdicionProducto from "../components/products/ModalEdicionProducto";
 import CuadroBusqueda from "../busqueda/CuadroBusqueda";
 import Paginacion from "../components/ordenamiento/Paginacion";
 import "../styles/Catalogo.css";
+import { useTranslation } from 'react-i18next';
+
 
 const Catalogo= () => {
   const [productos, setProductos] = useState([]);
@@ -21,6 +23,7 @@ const Catalogo= () => {
   const [productosFiltrados, setProductosFiltrados] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 8; // 8 productos por página para mejor distribución en la cuadrícula
+  const { t } = useTranslation();
 
   // Calcular productos paginados
   const paginatedProductos = productosFiltrados.slice(
@@ -124,17 +127,17 @@ const Catalogo= () => {
   return (
     <Container className="mt-5 catalogo-container">
       <br />
-      <h4>Catálogo de Productos</h4>
+      <h4>{t("catalogo.titulo")}</h4>
       {/* Filtro de categorías */}
       <Row>
         <Col lg={3} md={3} sm={6}>
           <Form.Group className="mb-3">
-            <Form.Label>Filtrar por categoría:</Form.Label>
+            <Form.Label>{t("catalogo.filtrarPorCategoria")}</Form.Label>
             <Form.Select
               value={categoriaSeleccionada}
               onChange={(e) => setCategoriaSeleccionada(e.target.value)}
             >
-              <option value="Todas">Todas</option>
+              <option value="Todas">{t("catalogo.todas")}</option>
               {categorias.map((categoria) => (
                 <option key={categoria.id} value={categoria.nombre}>
                   {categoria.nombre}
@@ -162,7 +165,7 @@ const Catalogo= () => {
           ))
         ) : (
           <Col>
-            <p>No hay productos en esta categoría.</p>
+            <p>{t("catalogo.noHayProductos")}</p>
           </Col>
         )}
       </Row>

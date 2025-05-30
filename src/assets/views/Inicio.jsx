@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from "react-router-dom";
 import { Container, Button } from "react-bootstrap";
 import ModalInstalacionIOS from "../components/inicio/ModalInstalacionIOS";
+import { useTranslation } from 'react-i18next';
 
 const Inicio = () => {
 
@@ -12,6 +13,7 @@ const Inicio = () => {
     const [mostrarBotonInstalacion, setMostrarBotonInstalacion] = useState(false);
     const [esDispositivoIOS, setEsDispositivoIOS] = useState(false);
     const [mostrarModalInstrucciones, setMostrarModalInstrucciones] = useState(false);
+    const { t } = useTranslation();
 
     // Detectar dispositivo iOS
     useEffect(() => {
@@ -64,23 +66,23 @@ console.log("solicitudInstalacion:", solicitudInstalacion);
 
   return (
     <Container>
-      <h1>Inicio</h1>
-      <button onClick={() => handleNavigate("/categorias")} >Ir a Categorías</button>
-      <button onClick={() => handleNavigate("/productos")} >Ir a Productos</button>
+      <h1>{t("inicio.titulo")}</h1>
+      <button onClick={() => handleNavigate("/categorias")} >{t("inicio.botonCategorias")}</button>
+      <button onClick={() => handleNavigate("/productos")} >{t("inicio.botonProductos")}</button>
       <br />
       {!esDispositivoIOS && mostrarBotonInstalacion && (
         <div className="my-4">
           <Button className="sombra" variant="primary" onClick={instalacion}>
-            Instalar app Ferretería Selva <i className="bi bi-download"></i>
+            {t("inicio.botonInstalar")} <i className="bi bi-download"></i>
           </Button>
         </div>
       )}
       {esDispositivoIOS && (
         <div className="text-center my-4">
           <Button className="sombra" variant="primary" onClick={abrirModalInstrucciones}>
-            Cómo instalar Ferretería Selva en iPhone <i className="bi bi-phone"></i>
+            {t("inicio.botonInstalar")} <i className="bi bi-phone"></i>
           </Button>
-        </div>
+        </div>    
       )}
       <ModalInstalacionIOS
         mostrar={mostrarModalInstrucciones}

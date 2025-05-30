@@ -19,9 +19,10 @@ import ModalEdicionCategoria from "../components/categories/ModalEdicionCategori
 import ModalEliminacionCategoria from "../components/categories/ModalEliminacionCategoria";
 import CuadroBusqueda from "../busqueda/CuadroBusqueda";
 import ChatIA from "../components/chat/ChatIA";
+import { useTranslation } from 'react-i18next';
 
 const Categorias = () => {
-  
+  const { t } = useTranslation();
   // Estados para manejo de datos
   const [categorias, setCategorias] = useState([]);
   const [showModal, setShowModal] = useState(false);
@@ -51,20 +52,20 @@ const Categorias = () => {
   const [isOffline, setIsOffline] = useState(!navigator.onLine);
 
   useEffect(() => {
-  const handleOnline = () => {
-    setIsOffline(false);
-  };
-  const handleOffline = () => {
-    setIsOffline(true);
-  };
-  window.addEventListener("online", handleOnline);
-  window.addEventListener("offline", handleOffline);
-  setIsOffline(!navigator.onLine);
-  return () => {
-    window.removeEventListener("online", handleOnline);
-    window.removeEventListener("offline", handleOffline);
-  };
-}, []);
+    const handleOnline = () => {
+      setIsOffline(false);
+    };
+    const handleOffline = () => {
+      setIsOffline(true);
+    };
+    window.addEventListener("online", handleOnline);
+    window.addEventListener("offline", handleOffline);
+    setIsOffline(!navigator.onLine);
+    return () => {
+      window.removeEventListener("online", handleOnline);
+      window.removeEventListener("offline", handleOffline);
+    };
+  }, []);
 
   // Función para obtener todas las categorías de Firestore
   const fetchCategorias = () => {
@@ -84,11 +85,12 @@ const Categorias = () => {
       if (isOffline) {
         console.log("Offline: Mostrando datos desde la caché local.");
       } else {
-        alert("Error al cargar las categorías: " + error.message);
+        alert(t('common.error') + ": " + error.message);
       }
     });
     return stopListening;
   };
+
   // Hook useEffect para carga inicial y escucha de datos
   useEffect(() => {
     const cleanupListener = fetchCategorias();
@@ -101,7 +103,7 @@ const Categorias = () => {
 
     const filtradas = categorias.filter((categoria) => 
       categoria.nombre.toLowerCase().includes(text) ||
-        categoria.descripcion.toLowerCase().includes(text)
+      categoria.descripcion.toLowerCase().includes(text)
     );
 
     setCategoriasFiltradas(filtradas);
@@ -129,7 +131,7 @@ const Categorias = () => {
   const handleAddCategoria = async () => {
     // Validar campos requeridos
     if (!nuevaCategoria.nombre || !nuevaCategoria.descripcion) {
-      alert("Por favor, completa todos los campos antes de guardar.");
+      alert(t('common.error'));
       return;
     }
 
@@ -167,14 +169,14 @@ const Categorias = () => {
         // Revertir cambios locales si falla en la nube
         setCategorias((prev) => prev.filter((cat) => cat.id !== tempId));
         setCategoriasFiltradas((prev) => prev.filter((cat) => cat.id !== tempId));
-        alert("Error al agregar la categoría: " + error.message);
+        alert(t('common.error') + ": " + error.message);
       }
     }
   };
 
   const handleEditCategoria = async () => {
     if (!categoriaEditada?.nombre || !categoriaEditada?.descripcion) {
-      alert("Por favor, completa todos los campos antes de actualizar.");
+      alert(t('common.error'));
       return;
     }
     
@@ -189,7 +191,7 @@ const Categorias = () => {
         descripcion: categoriaEditada.descripcion,
       });
 
-      console.log('Red desconectada:', isOffline )
+      console.log('Red desconectada:', isOffline)
   
       if (isOffline) {
         // Actualizar estado local inmediatamente si no hay conexión
@@ -204,9 +206,7 @@ const Categorias = () => {
           )
         );
         console.log("Categoría actualizada localmente (sin conexión).");
-        alert(
-          "Sin conexión: Categoría actualizada localmente. Se sincronizará cuando haya internet."
-        );
+        alert(t('common.error'));
       } else {
         // Si hay conexión, confirmar éxito en la nube
         console.log("Categoría actualizada exitosamente en la nube.");
@@ -224,7 +224,7 @@ const Categorias = () => {
           cat.id === categoriaEditada.id ? { ...categoriaEditada } : cat
         )
       );
-      alert("Ocurrió un error al actualizar la categoría: " + error.message);
+      alert(t('common.error') + ": " + error.message);
     }
   };
 
@@ -252,16 +252,7 @@ const Categorias = () => {
       }
     } catch (error) {
       console.error("Error al eliminar la categoría:", error);
-  
-      // Manejar error según estado de conexión
-      if (isOffline) {
-        console.log("Offline: Eliminación almacenada localmente.");
-      } else {
-        // Restaurar categoría en estado local si falla en la nube
-        setCategorias((prev) => [...prev, categoriaAEliminar]);
-        setCategoriasFiltradas((prev) => [...prev, categoriaAEliminar]);
-        alert("Error al eliminar la categoría: " + error.message);
-      }
+      alert(t('common.error') + ": " + error.message);
     }
   };
 
@@ -281,48 +272,54 @@ const Categorias = () => {
   return (
     <Container className="mt-5">
       <br />
-      <h4>Gestión de Categorías</h4>
-      <Button className="mb-3" onClick={() => setShowModal(true)}>
-        Agregar categoría
-      </Button>
-      <Button className="mb-3" onClick={() => setShowChatModal(true)} style={{ width: "100%" }}>
-        Chat IA
-      </Button>
+      <h4>{t("categorias.titulo")}</h4>
+      <div className="d-flex justify-content-between align-items-center mb-3">
+        <Button className="mb-3" onClick={() => setShowModal(true)}>
+          {t("categorias.agregarCategoria")}
+        </Button>
+        <Button className="mb-3" onClick={() => setShowChatModal(true)} style={{ width: "100%" }}>
+          {t("categorias.chatIA")}
+        </Button>
+      </div>
       <CuadroBusqueda
-        searchText={searchText}
-        handleSearchChange={handleSearchChange}
+        placeholder={t('categorias.buscar')}
+        value={searchText}
+        onChange={handleSearchChange}
       />
-
 
       <TablaCategorias
         categorias={paginatedCategorias}
-        openEditModal={openEditModal}
-        openDeleteModal={openDeleteModal}
+        onEdit={openEditModal}
+        onDelete={openDeleteModal}
         totalItems={categoriasFiltradas.length}
         itemsPerPage={itemsPerPage}
         currentPage={currentPage}
         setCurrentPage={setCurrentPage}
       />
       <ModalRegistroCategoria
-        showModal={showModal}
-        setShowModal={setShowModal}
+        show={showModal}
+        onHide={() => setShowModal(false)}
         nuevaCategoria={nuevaCategoria}
         handleInputChange={handleInputChange}
         handleAddCategoria={handleAddCategoria}
       />
       <ModalEdicionCategoria
-        showEditModal={showEditModal}
-        setShowEditModal={setShowEditModal}
+        show={showEditModal}
+        onHide={() => setShowEditModal(false)}
         categoriaEditada={categoriaEditada}
         handleEditInputChange={handleEditInputChange}
         handleEditCategoria={handleEditCategoria}
       />
       <ModalEliminacionCategoria
-        showDeleteModal={showDeleteModal}
-        setShowDeleteModal={setShowDeleteModal}
+        show={showDeleteModal}
+        onHide={() => setShowDeleteModal(false)}
+        categoriaAEliminar={categoriaAEliminar}
         handleDeleteCategoria={handleDeleteCategoria}
       />
-      <ChatIA showChatModal={showChatModal} setShowChatModal={setShowChatModal} />
+      <ChatIA
+        show={showChatModal}
+        onHide={() => setShowChatModal(false)}
+      />
     </Container>
   );
 };

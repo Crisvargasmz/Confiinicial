@@ -2,23 +2,28 @@ import React from "react";
 import { Table, Button, Image } from "react-bootstrap";
 import "bootstrap-icons/font/bootstrap-icons.css";
 import Paginacion from "../ordenamiento/Paginacion";
+import { useTranslation } from 'react-i18next';
 
-const TablaProductos = ({ productos, openEditModal, openDeleteModal, totalItems,generarPDFDetalleProducto,
-  itemsPerPage,
-  currentPage,
-  setCurrentPage,
-  handleCopy,
-  handleShowQR }) => {
+const TablaProductos = ({
+  productos,
+  onEdit,
+  onDelete,
+  onCopy,
+  onShowQR,
+  onGeneratePDF
+}) => {
+  const { t } = useTranslation();
+
   return (
     <>
       <Table striped bordered hover responsive>
         <thead>
           <tr>
-            <th>Imagen</th>
-            <th>Nombre</th>
-            <th>Precio</th>
-            <th>Categoría</th>
-            <th>Acciones</th>
+            <th>{t('productos.imagen')}</th>
+            <th>{t('productos.nombre')}</th>
+            <th>{t('productos.precio')}</th>
+            <th>{t('productos.categoria')}</th>
+            <th>{t('common.acciones')}</th>
           </tr>
         </thead>
         <tbody>
@@ -37,7 +42,8 @@ const TablaProductos = ({ productos, openEditModal, openDeleteModal, totalItems,
                   variant="outline-info"
                   size="sm"
                   className="me-2"
-                  onClick={() => handleCopy(producto)}
+                  onClick={() => onCopy(producto)}
+                  title={t('common.copiar')}
                 >
                   <i className="bi bi-clipboard"></i>
                 </Button>
@@ -45,14 +51,16 @@ const TablaProductos = ({ productos, openEditModal, openDeleteModal, totalItems,
                   variant="outline-warning"
                   size="sm"
                   className="me-2"
-                  onClick={() => openEditModal(producto)}
+                  onClick={() => onEdit(producto)}
+                  title={t('common.editar')}
                 >
                   <i className="bi bi-pencil"></i>
                 </Button>
                 <Button
                   variant="outline-danger"
                   size="sm"
-                  onClick={() => openDeleteModal(producto)}
+                  onClick={() => onDelete(producto)}
+                  title={t('common.eliminar')}
                 >
                   <i className="bi bi-trash"></i>
                 </Button>
@@ -60,7 +68,8 @@ const TablaProductos = ({ productos, openEditModal, openDeleteModal, totalItems,
                   variant="outline-primary"
                   size="sm"
                   className="me-2"
-                  onClick={() => handleShowQR(producto)}
+                  onClick={() => onShowQR(producto)}
+                  title={t('productos.generarQR')}
                 >
                   <i className="bi bi-qr-code"></i>
                 </Button>
@@ -68,23 +77,16 @@ const TablaProductos = ({ productos, openEditModal, openDeleteModal, totalItems,
                   variant="outline-success"
                   size="sm"
                   className="me-2"
-                  onClick={() => generarPDFDetalleProducto(producto)}
+                  onClick={() => onGeneratePDF(producto)}
+                  title={t('productos.generarPDF')}
                 > 
                   <i className="bi bi-file-pdf"></i>
                 </Button>
-
-
               </td>
             </tr>
           ))}
         </tbody>
       </Table>
-      <Paginacion
-        itemsPerPage={itemsPerPage}
-        totalItems={totalItems}
-        currentPage={currentPage}
-        setCurrentPage={setCurrentPage}
-      />
     </>
   );
 };

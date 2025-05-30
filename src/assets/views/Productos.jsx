@@ -21,9 +21,10 @@ import { jsPDF } from "jspdf";
 import autoTable from "jspdf-autotable";
 import * as XLSX from "xlsx";
 import { saveAs } from "file-saver";
-
+import { useTranslation } from 'react-i18next';
 
 const Productos = () => {
+  const { t } = useTranslation();
   // Estados para manejo de datos
   const [productos, setProductos] = useState([]);
   const [categorias, setCategorias] = useState([]);
@@ -45,13 +46,12 @@ const Productos = () => {
   const [showQRModal, setShowQRModal] = useState(false);
   const [qrText, setQrText] = useState("");
 
-
   // Referencia a las colecciones en Firestore
   const productosCollection = collection(db, "productos");
   const categoriasCollection = collection(db, "categorias");
 
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 5; // Número de productos por página
+  const itemsPerPage = 5;
 
   const [isOffline, setIsOffline] = useState(!navigator.onLine);
 
@@ -71,19 +71,18 @@ const Productos = () => {
     };
   }, []);
 
-
   const generarPDFProductos = () => {
     const doc = new jsPDF();
     doc.setFillColor(28, 41, 51);
     doc.rect(0, 0, 220, 30, 'F');
     doc.setTextColor(255, 255, 255);
     doc.setFontSize(16);
-    doc.text("Reporte de Productos", doc.internal.pageSize.width / 2, 18, 'center');
+    doc.text(t('productos.reportePDF'), doc.internal.pageSize.width / 2, 18, 'center');
     const columnas = [
       "#",
-      "Nombre",
-      "Precio",
-      "Categoría"
+      t('productos.nombre'),
+      t('productos.precio'),
+      t('productos.categoria')
     ]
     const filas = productosFiltrados.map((producto, index) => [
       index + 1,
@@ -119,16 +118,12 @@ const Productos = () => {
       didDrawPage: function (data) {
         const alturaPagina = doc.internal.pageSize.height;
         const anchoPagina = doc.internal.pageSize.width;
-
         const numeroPagina = doc.internal.getNumberOfPages();
-
         doc.setFontSize(10);
         doc.setTextColor(0, 0, 0);
-        const piePagina = `Página ${numeroPagina} de ${totalPaginas}`;
+        const piePagina = `${t('common.pagina')} ${numeroPagina} ${t('common.de')} ${totalPaginas}`;
         doc.text(piePagina, anchoPagina / 2 + 15, alturaPagina - 10, 'center');
-
       },
-
     });
 
     if (typeof doc.putTotalPages === "function") {
@@ -139,12 +134,9 @@ const Productos = () => {
     const dia = String(new Date().getDate()).padStart(2, '0');
     const mes = String(new Date().getMonth() + 1).padStart(2, '0');
     const anio = new Date().getFullYear();
-    const nombreArchivo = `Reporte de Productos ${dia}-${mes}-${anio}.pdf`;
+    const nombreArchivo = `${t('productos.reportePDF')} ${dia}-${mes}-${anio}.pdf`;
 
     doc.save(nombreArchivo);
-
-
-
   }
 
   const generarPDFDetalleProducto = (producto) => {
@@ -170,14 +162,14 @@ const Productos = () => {
       const posicionY = 40 + altoImagen + 10;
       pdf.setTextColor(0, 0, 0);
       pdf.setFontSize(14);
-      pdf.text(`Precio: C$${producto.precio}`, anchoPagina / 2, posicionY, { align: "center" });
-      pdf.text(`Categoría: ${producto.categoria}`, anchoPagina / 2, posicionY + 10, { align: "center" });
+      pdf.text(`${t('productos.precio')}: C$${producto.precio}`, anchoPagina / 2, posicionY, { align: "center" });
+      pdf.text(`${t('productos.categoria')}: ${producto.categoria}`, anchoPagina / 2, posicionY + 10, { align: "center" });
     } else {
       // Si no hay imagen, mostrar los datos más arriba
       pdf.setTextColor(0, 0, 0);
       pdf.setFontSize(14);
-      pdf.text(`Precio: C$${producto.precio}`, pdf.internal.pageSize.getWidth() / 2, 50, { align: "center" });
-      pdf.text(`Categoría: ${producto.categoria}`, pdf.internal.pageSize.getWidth() / 2, 60, { align: "center" });
+      pdf.text(`${t('productos.precio')}: C$${producto.precio}`, pdf.internal.pageSize.getWidth() / 2, 50, { align: "center" });
+      pdf.text(`${t('productos.categoria')}: ${producto.categoria}`, pdf.internal.pageSize.getWidth() / 2, 60, { align: "center" });
     }
 
     pdf.save(`${producto.nombre}.pdf`);
@@ -187,15 +179,15 @@ const Productos = () => {
     // 1. Estructura de datos para la hoja Excel
     const datos = productosFiltrados.map((producto, index) => ({
       "#": index + 1,
-      Nombre: producto.nombre,
-      Precio: parseFloat(producto.precio),
-      Categoría: producto.categoria,
+      [t('productos.nombre')]: producto.nombre,
+      [t('productos.precio')]: parseFloat(producto.precio),
+      [t('productos.categoria')]: producto.categoria,
     }));
 
     // 2. Crear hoja y libro Excel
     const hoja = XLSX.utils.json_to_sheet(datos);
     const libro = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(libro, hoja, 'Productos');
+    XLSX.utils.book_append_sheet(libro, hoja, t('productos.titulo'));
 
     // 3. Crear el archivo binario
     const excelBuffer = XLSX.write(libro, { bookType: 'xlsx', type: 'array' });
@@ -205,13 +197,11 @@ const Productos = () => {
     const dia = String(fecha.getDate()).padStart(2, '0');
     const mes = String(fecha.getMonth() + 1).padStart(2, '0');
     const anio = fecha.getFullYear();
-    const nombreArchivo = `Reporte de Productos ${dia}-${mes}-${anio}.xlsx`;
+    const nombreArchivo = `${t('productos.reportePDF')} ${dia}-${mes}-${anio}.xlsx`;
 
     const data = new Blob([excelBuffer], { type: "application/octet-stream" });
     saveAs(data, nombreArchivo);
-
   }
-
 
   // Calcular productos paginados
   const paginatedProductos = productosFiltrados.slice(
@@ -237,7 +227,7 @@ const Productos = () => {
       if (isOffline) {
         console.log("Offline: Mostrando datos desde caché local.");
       } else {
-        alert("Error al cargar productos: " + error.message);
+        alert(t('common.error') + ": " + error.message);
       }
     });
 
@@ -248,16 +238,6 @@ const Productos = () => {
         id: doc.id,
       }));
       setCategorias(fetchedCategorias);
-      if (isOffline) {
-        console.log("Offline: Categorías cargadas desde caché local.");
-      }
-    }, (error) => {
-      console.error("Error al escuchar categorías:", error);
-      if (isOffline) {
-        console.log("Offline: Mostrando categorías desde caché local.");
-      } else {
-        alert("Error al cargar categorías: " + error.message);
-      }
     });
 
     return () => {
@@ -266,16 +246,10 @@ const Productos = () => {
     };
   };
 
-
-
-  // Hook useEffect para carga inicial de datos
   useEffect(() => {
-    fetchData();
+    const cleanup = fetchData();
+    return cleanup;
   }, []);
-
-  useEffect(() => {
-    setProductosFiltrados(productos);
-  }, [productos]);
 
   const handleSearchChange = (e) => {
     const text = e.target.value.toLowerCase();
@@ -289,25 +263,31 @@ const Productos = () => {
     setProductosFiltrados(filtrados);
   };
 
-  // Manejador de cambios en inputs del formulario de nuevo producto
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setNuevoProducto((prev) => ({ ...prev, [name]: value }));
+    setNuevoProducto((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
   };
 
-  // Manejador de cambios en inputs del formulario de edición
   const handleEditInputChange = (e) => {
     const { name, value } = e.target;
-    setProductoEditado((prev) => ({ ...prev, [name]: value }));
+    setProductoEditado((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
   };
 
-  // Manejador para la carga de imágenes
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     if (file) {
       const reader = new FileReader();
       reader.onloadend = () => {
-        setNuevoProducto((prev) => ({ ...prev, imagen: reader.result }));
+        setNuevoProducto((prev) => ({
+          ...prev,
+          imagen: reader.result,
+        }));
       };
       reader.readAsDataURL(file);
     }
@@ -318,307 +298,233 @@ const Productos = () => {
     if (file) {
       const reader = new FileReader();
       reader.onloadend = () => {
-        setProductoEditado((prev) => ({ ...prev, imagen: reader.result }));
+        setProductoEditado((prev) => ({
+          ...prev,
+          imagen: reader.result,
+        }));
       };
       reader.readAsDataURL(file);
     }
   };
 
   const handleAddProducto = async () => {
-    // Validar campos requeridos
-    if (
-      !nuevoProducto.nombre ||
-      !nuevoProducto.precio ||
-      !nuevoProducto.categoria ||
-      !nuevoProducto.imagen
-    ) {
-      alert("Por favor, completa todos los campos, incluyendo la imagen.");
+    if (!nuevoProducto.nombre || !nuevoProducto.precio || !nuevoProducto.categoria) {
+      alert(t('common.error'));
       return;
     }
 
-    // Cerrar modal
     setShowModal(false);
 
-    // Crear ID temporal y objeto del producto
     const tempId = `temp_${Date.now()}`;
-    const productoConId = {
-      ...nuevoProducto,
-      id: tempId,
-      precio: parseFloat(nuevoProducto.precio), // Asegurar que precio sea número
-    };
+    const productoConId = { ...nuevoProducto, id: tempId };
 
     try {
-      // Actualizar estado local
       setProductos((prev) => [...prev, productoConId]);
       setProductosFiltrados((prev) => [...prev, productoConId]);
 
-      // Mensaje según estado de conexión
+      setNuevoProducto({
+        nombre: "",
+        precio: "",
+        categoria: "",
+        imagen: ""
+      });
+
+      await addDoc(productosCollection, nuevoProducto);
+
       if (isOffline) {
         console.log("Producto agregado localmente (sin conexión).");
-        alert("Sin conexión: Producto agregado localmente. Se sincronizará al reconectar.");
       } else {
         console.log("Producto agregado exitosamente en la nube.");
       }
-
-      // Guardar en Firestore
-      await addDoc(productosCollection, {
-        nombre: nuevoProducto.nombre,
-        precio: parseFloat(nuevoProducto.precio),
-        categoria: nuevoProducto.categoria,
-        imagen: nuevoProducto.imagen,
-      });
-
-      // Limpiar formulario
-      setNuevoProducto({ nombre: "", precio: "", categoria: "", imagen: "" });
     } catch (error) {
       console.error("Error al agregar el producto:", error);
+
       if (isOffline) {
         console.log("Offline: Producto almacenado localmente.");
       } else {
-        // Revertir cambios locales si falla en la nube
         setProductos((prev) => prev.filter((prod) => prod.id !== tempId));
         setProductosFiltrados((prev) => prev.filter((prod) => prod.id !== tempId));
-        alert("Error al agregar el producto: " + error.message);
+        alert(t('common.error') + ": " + error.message);
       }
     }
   };
 
   const handleEditProducto = async () => {
-    // Validar campos requeridos
-    if (
-      !productoEditado.nombre ||
-      !productoEditado.precio ||
-      !productoEditado.categoria ||
-      !productoEditado.imagen
-    ) {
-      alert("Por favor, completa todos los campos, incluyendo la imagen.");
+    if (!productoEditado?.nombre || !productoEditado?.precio || !productoEditado?.categoria) {
+      alert(t('common.error'));
       return;
     }
 
-    // Cerrar modal
     setShowEditModal(false);
 
     const productoRef = doc(db, "productos", productoEditado.id);
 
     try {
-      // Actualizar estado local
-      setProductos((prev) =>
-        prev.map((prod) =>
-          prod.id === productoEditado.id
-            ? { ...productoEditado, precio: parseFloat(productoEditado.precio) }
-            : prod
-        )
-      );
-      setProductosFiltrados((prev) =>
-        prev.map((prod) =>
-          prod.id === productoEditado.id
-            ? { ...productoEditado, precio: parseFloat(productoEditado.precio) }
-            : prod
-        )
-      );
-
-      // Mensaje según estado de conexión
-      if (isOffline) {
-        console.log("Producto actualizado localmente (sin conexión).");
-        alert("Sin conexión: Producto actualizado localmente. Se sincronizará al reconectar.");
-      } else {
-        console.log("Producto actualizado exitosamente en la nube.");
-      }
-
-      // Actualizar en Firestore
       await updateDoc(productoRef, {
         nombre: productoEditado.nombre,
-        precio: parseFloat(productoEditado.precio),
+        precio: productoEditado.precio,
         categoria: productoEditado.categoria,
-        imagen: productoEditado.imagen,
+        imagen: productoEditado.imagen
       });
 
-    } catch (error) {
-      console.error("Error al actualizar el producto:", error);
       if (isOffline) {
-        console.log("Offline: Producto actualizado localmente.");
-      } else {
-        // Revertir cambios locales si falla en la nube
         setProductos((prev) =>
           prev.map((prod) =>
-            prod.id === productoEditado.id ? { ...prod } : prod
+            prod.id === productoEditado.id ? { ...productoEditado } : prod
           )
         );
         setProductosFiltrados((prev) =>
           prev.map((prod) =>
-            prod.id === productoEditado.id ? { ...prod } : prod
+            prod.id === productoEditado.id ? { ...productoEditado } : prod
           )
         );
-        alert("Error al actualizar el producto: " + error.message);
+        console.log("Producto actualizado localmente (sin conexión).");
+        alert(t('common.error'));
+      } else {
+        console.log("Producto actualizado exitosamente en la nube.");
       }
+    } catch (error) {
+      console.error("Error al actualizar el producto:", error);
+      setProductos((prev) =>
+        prev.map((prod) =>
+          prod.id === productoEditado.id ? { ...productoEditado } : prod
+        )
+      );
+      setProductosFiltrados((prev) =>
+        prev.map((prod) =>
+          prod.id === productoEditado.id ? { ...productoEditado } : prod
+        )
+      );
+      alert(t('common.error') + ": " + error.message);
     }
   };
 
   const handleDeleteProducto = async () => {
     if (!productoAEliminar) return;
 
-    // Cerrar modal
     setShowDeleteModal(false);
 
     try {
-      // Actualizar estado local
       setProductos((prev) => prev.filter((prod) => prod.id !== productoAEliminar.id));
       setProductosFiltrados((prev) => prev.filter((prod) => prod.id !== productoAEliminar.id));
 
-      // Mensaje según estado de conexión
-      if (isOffline) {
-        console.log("Producto eliminado localmente (sin conexión).");
-        alert("Sin conexión: Producto eliminado localmente. Se sincronizará al reconectar.");
-      } else {
-        console.log("Producto eliminado exitosamente en la nube.");
-      }
-
-      // Eliminar en Firestore
       const productoRef = doc(db, "productos", productoAEliminar.id);
       await deleteDoc(productoRef);
 
+      if (isOffline) {
+        console.log("Producto eliminado localmente (sin conexión).");
+      } else {
+        console.log("Producto eliminado exitosamente en la nube.");
+      }
     } catch (error) {
       console.error("Error al eliminar el producto:", error);
-      if (isOffline) {
-        console.log("Offline: Eliminación almacenada localmente.");
-      } else {
-        // Restaurar producto en estado local si falla en la nube
-        setProductos((prev) => [...prev, productoAEliminar]);
-        setProductosFiltrados((prev) => [...prev, productoAEliminar]);
-        alert("Error al eliminar el producto: " + error.message);
-      }
+      alert(t('common.error') + ": " + error.message);
     }
   };
 
-
-  // Función para abrir el modal de edición con datos prellenados
   const openEditModal = (producto) => {
     setProductoEditado({ ...producto });
     setShowEditModal(true);
   };
 
-  // Función para abrir el modal de eliminación
   const openDeleteModal = (producto) => {
     setProductoAEliminar(producto);
     setShowDeleteModal(true);
   };
 
-  // Método para copiar datos de una fila al portapapeles
   const handleCopy = (producto) => {
-    if (!producto || (!producto.nombre && !producto.precio && !producto.categoria)) {
-      setToastMsg("No hay datos para copiar.");
+    const texto = `${producto.nombre}\nPrecio: C$${producto.precio}\nCategoría: ${producto.categoria}`;
+    navigator.clipboard.writeText(texto).then(() => {
+      setToastMsg(t('productos.copiadoExito'));
       setShowToast(true);
-      return;
-    }
-    const rowData = `Nombre: ${producto.nombre}\nPrecio: C$${producto.precio}\nCategoría: ${producto.categoria}`;
-    navigator.clipboard
-      .writeText(rowData)
-      .then(() => {
-        setToastMsg("¡Datos copiados al portapapeles!");
-        setShowToast(true);
-      })
-      .catch((err) => {
-        setToastMsg("Error al copiar al portapapeles");
-        setShowToast(true);
-        console.error("Error al copiar al portapapeles:", err);
-      });
+    });
   };
 
   const handleShowQR = (producto) => {
-    const rowData = `Nombre: ${producto.nombre}\nPrecio: C$${producto.precio}\nCategoría: ${producto.categoria}`;
-    setQrText(rowData);
+    const texto = `${producto.nombre}\nPrecio: C$${producto.precio}\nCategoría: ${producto.categoria}`;
+    setQrText(texto);
     setShowQRModal(true);
   };
 
-  // Renderizado del componente
   return (
     <Container className="mt-5">
-      <br />
-      <h4>Gestión de Productos</h4>
-      <Button className="mb-3" onClick={() => setShowModal(true)}>
-        Agregar producto
-      </Button>
+      <h1>{t('productos.titulo')}</h1>
+      <div className="d-flex justify-content-between align-items-center mb-3">
+        <Button variant="primary" onClick={() => setShowModal(true)}>
+          {t('productos.nuevoProducto')}
+        </Button>
+        <div>
+          <Button variant="success" className="me-2" onClick={generarPDFProductos}>
+            {t('productos.exportarPDF')}
+          </Button>
+          <Button variant="info" onClick={generarExcelProductos}>
+            {t('productos.exportarExcel')}
+          </Button>
+        </div>
+      </div>
 
       <CuadroBusqueda
-        searchText={searchText}
-        handleSearchChange={handleSearchChange}
+        placeholder={t('productos.buscar')}
+        value={searchText}
+        onChange={handleSearchChange}
       />
-
-      <Row>
-        <Col lg={3} md={4} sm={4} xs={5}>
-          <Button
-            className="mb-3"
-            onClick={generarPDFProductos}
-            variant="secondary"
-            style={{ width: "100%" }}
-          >
-            Generar reporte PDF
-          </Button>
-        </Col>
-        <Col lg={3} md={4} sm={4} xs={6}>
-          <Button
-            className="mb-3"
-            onClick={generarExcelProductos}
-            variant="success"
-            style={{ width: "100%" }}
-          >
-            Generar reporte Excel
-          </Button>
-        </Col>
-      </Row>
-
-
 
       <TablaProductos
-        openEditModal={openEditModal}
-        openDeleteModal={openDeleteModal}
-        generarPDFDetalleProducto={generarPDFDetalleProducto}
         productos={paginatedProductos}
-        totalItems={productos.length}
-        itemsPerPage={itemsPerPage}
-        currentPage={currentPage}
-        setCurrentPage={setCurrentPage}
-        handleCopy={handleCopy}
-        handleShowQR={handleShowQR}
+        onEdit={openEditModal}
+        onDelete={openDeleteModal}
+        onCopy={handleCopy}
+        onShowQR={handleShowQR}
+        onGeneratePDF={generarPDFDetalleProducto}
       />
 
-
-
       <ModalRegistroProducto
-        showModal={showModal}
-        setShowModal={setShowModal}
+        show={showModal}
+        onHide={() => setShowModal(false)}
         nuevoProducto={nuevoProducto}
+        categorias={categorias}
         handleInputChange={handleInputChange}
         handleImageChange={handleImageChange}
         handleAddProducto={handleAddProducto}
-        categorias={categorias}
       />
+
       <ModalEdicionProducto
-        showEditModal={showEditModal}
-        setShowEditModal={setShowEditModal}
+        show={showEditModal}
+        onHide={() => setShowEditModal(false)}
         productoEditado={productoEditado}
+        categorias={categorias}
         handleEditInputChange={handleEditInputChange}
         handleEditImageChange={handleEditImageChange}
         handleEditProducto={handleEditProducto}
-        categorias={categorias}
       />
+
       <ModalEliminacionProducto
-        showDeleteModal={showDeleteModal}
-        setShowDeleteModal={setShowDeleteModal}
+        show={showDeleteModal}
+        onHide={() => setShowDeleteModal(false)}
+        productoAEliminar={productoAEliminar}
         handleDeleteProducto={handleDeleteProducto}
       />
+
       <ModalQR
         show={showQRModal}
-        handleClose={() => setShowQRModal(false)}
-        qrUrl={qrText}
+        onHide={() => setShowQRModal(false)}
+        qrText={qrText}
       />
+
       <Toast
-        onClose={() => setShowToast(false)}
         show={showToast}
-        delay={2000}
+        onClose={() => setShowToast(false)}
+        delay={3000}
         autohide
-        style={{ position: 'fixed', top: 20, right: 20, zIndex: 9999 }}
+        style={{
+          position: 'fixed',
+          top: 20,
+          right: 20,
+        }}
       >
+        <Toast.Header>
+          <strong className="me-auto">{t('common.exito')}</strong>
+        </Toast.Header>
         <Toast.Body>{toastMsg}</Toast.Body>
       </Toast>
     </Container>
