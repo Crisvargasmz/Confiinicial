@@ -27,6 +27,7 @@ use(initReactI18next)
                     idioma: "Idioma",
                     español: "Español",
                     ingles: "Inglés",
+                    empleados: "Empleados",
                 },
                 login: {
                     titulo: "Iniciar Sesión",
@@ -185,6 +186,7 @@ use(initReactI18next)
                     clima: "Weather",
                     pronunciacion: "Pronunciation",
                     estadisticas: "Statistics",
+                    empleados: "Employees",
                     cerrarSesion: "Logout",
                     iniciarSesion: "Login",
                     idioma: "Language",

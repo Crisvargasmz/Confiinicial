@@ -134,6 +134,15 @@ const Encabezado = () => {
 
               </Nav.Link>
 
+              
+              <Nav.Link
+                onClick={() => handleNavigate("/empleados")}
+                className={isCollapsed ? "color-texto-marca" : "text-white"}
+              >
+                {isCollapsed ? <i className="bi-cloud-sun-fill me-2"></i> : null}
+                <strong>{t("menu.empleados")}</strong>
+
+              </Nav.Link>
 
               <Nav.Link
                 onClick={() => handleNavigate("/libros")}
